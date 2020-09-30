@@ -1,0 +1,168 @@
+#include <string>
+#include <vector>
+#include <algorithm>
+using namespace std;
+typedef struct tree* tp;
+typedef struct tree {
+	int data=0;
+	tp link[26];
+}TREE;
+
+TREE *node[100001];
+TREE* node1[100001];
+void addtree(string words)
+{
+	int n = words.length();
+	int i;
+	int j;
+	int k;
+	tp ptr;
+	if (node[n] == NULL)
+	{
+		TREE* newnode = (TREE*)malloc(sizeof(TREE));
+		newnode->data = 1;
+		node[n] = newnode;
+		ptr = newnode;
+		for (k = 0; k < 26; k++)
+			ptr->link[k] = NULL;
+	}
+	else
+	{
+		ptr = node[n];
+		ptr->data = ptr->data + 1;
+	}
+	for (i = 0; i < n; i++)
+	{
+		j = words[i]-'a';
+		if (ptr->link[j] == NULL)
+		{
+			TREE* newnode = (TREE*)malloc(sizeof(TREE));
+			newnode->data = 1;
+			ptr->link[j] = newnode;
+			ptr = newnode;
+			for (k = 0; k < 26; k++)
+				ptr->link[k] = NULL;
+		}
+		else
+		{
+			ptr = ptr->link[j];
+			ptr->data = ptr->data + 1;
+		}
+	}
+
+}
+void addreversetree(string words)
+{
+	int n = words.length();
+	tp ptr;
+	int i;
+	int j,k;
+	if (node1[n] == NULL)
+	{
+		TREE* newnode = (TREE*)malloc(sizeof(TREE));
+		node1[n] = newnode;
+		ptr = newnode;
+		ptr->data = 1;
+		for (k = 0; k < 26; k++)
+			ptr->link[k] = NULL;
+	}
+	else
+	{
+		ptr = node1[n];
+		ptr->data = ptr->data + 1;
+	}
+	for (i = n-1; i >= 0; i--)
+	{
+		j = words[i] - 'a';
+		if (ptr->link[j] == NULL)
+		{
+			TREE* newnode = (TREE*)malloc(sizeof(TREE));
+			newnode->data = 1;
+			ptr->link[j] = newnode;
+			ptr = newnode;
+			for (k = 0; k < 26; k++)
+				ptr->link[k] = NULL;
+		}
+		else
+		{
+			ptr = ptr->link[j];
+			ptr->data = ptr->data + 1;
+		}
+	}
+
+}
+int retrieve(string keyword)
+{
+	int cnt=0;
+	int n = keyword.length();
+	int i;
+	int j;
+	int flag = 1;
+	tp ptr;
+	if (keyword[0] != '?')
+	{
+		ptr = node[n];
+		if (ptr != NULL)
+		{
+			for (i = 0; keyword[i] != '?'; i++)
+			{
+				j = keyword[i] - 'a';
+				if (ptr->link[j] != NULL)
+				{
+					ptr = ptr->link[j];
+				}
+				else
+				{
+					flag = 0;
+					break;
+				}
+			}
+			if (flag == 1)
+			{
+				cnt = ptr->data;
+			}
+		}
+	}
+	else
+	{
+		ptr = node1[n];
+		if (ptr != NULL)
+		{
+			for (i = n - 1; keyword[i] != '?'; i--)
+			{
+				j = keyword[i] - 'a';
+				if (ptr->link[j] != NULL)
+				{
+					ptr = ptr->link[j];
+				}
+				else
+				{
+					flag = 0;
+					break;
+				}
+			}
+			if (flag == 1)
+			{
+				cnt = ptr->data;
+			}
+		}
+	}
+
+	return cnt;
+}
+vector<int> solution(vector<string> words, vector<string> queries) {
+	vector<int> answer;
+	int i;
+	int wsize = words.size();
+	int qsize = queries.size();
+	for (i = 0; i < wsize; i++)
+	{
+		addtree(words[i]);
+		addreversetree(words[i]);
+	}
+	for (i = 0; i < qsize; i++)
+	{
+		answer.push_back(retrieve(queries[i]));
+	}
+	return answer;
+}
