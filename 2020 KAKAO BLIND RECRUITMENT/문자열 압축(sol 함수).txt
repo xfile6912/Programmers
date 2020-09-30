@@ -1,0 +1,62 @@
+#include <string>
+#include <vector>
+
+using namespace std;
+
+int solution(string s) {
+	int answer = 0;
+	int i,j;
+	string temp="";
+	int k;
+	int cnt=0;
+	int min=1000;
+	int length = 0;
+	for (i = 1; i <= s.length(); i++)
+	{
+		cnt = 0;
+		length = 0;
+		for (j = 0; j <= s.length();)
+		{
+			if (temp!=s.substr(j,i))
+			{
+				if (cnt == 1)
+				{
+					length += i;
+				}
+				else if (cnt > 1 && cnt<= 9)
+				{
+					length += 1;
+					length += i;
+				}
+				else if (cnt >= 10 && cnt <= 99)
+				{
+					length+=2;
+					length += i;
+				}
+				else if (cnt >= 100 && cnt <= 999)
+				{
+					length += 3;
+					length += i;
+				}
+				else if (cnt > 999)
+				{
+					length += 4;
+					length += i;
+				}
+				temp = s.substr(j, i);
+				cnt=1;
+				j = j + i;
+			}
+			else
+			{
+				cnt++;
+				j = j + i;
+			}
+		}
+		length = length + temp.length();
+		if (min > length)
+			min = length;
+	}
+	answer = min;
+	return answer;
+}
