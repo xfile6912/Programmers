@@ -1,0 +1,64 @@
+#include <string>
+#include <vector>
+#include <iostream>
+using namespace std;
+
+string solution(vector<int> numbers, string hand) {
+	string answer = "";
+	int lefti=3;
+	int leftj=1;
+	int righti=3;
+	int rightj=3;
+	for (int i = 0; i < numbers.size(); i++)
+	{
+		if (numbers[i] == 1 || numbers[i] == 4 || numbers[i] == 7)//왼쪽 3개 키패드에서 움직이는경우(왼손사용)
+		{
+			answer += "L";
+			lefti = numbers[i] / 3;
+			leftj = 1;
+		}
+		else if (numbers[i] == 3 || numbers[i] == 6 || numbers[i] == 9)//오른쪽 3개 키패드에서 움직이는경우(오른손사용)
+		{
+			answer += "R";
+			righti = numbers[i] / 3-1;
+			rightj = 3;
+		}
+		else//중앙 4개 키패드에서 움직이는경우(왼손인지 오른손인지 결정해야함)
+		{
+			int locai=numbers[i]/3;
+			if (numbers[i] == 0)
+				locai = 3;
+			int locaj = 2;
+			int leftdistance=abs(lefti-locai)+abs(leftj-locaj);//왼손이 움직여야하는 거리계산
+			int rightdistance=abs(righti-locai)+abs(rightj-locaj);//오른손이 움직여야하는 거리계산
+			if (leftdistance < rightdistance)//왼손 움직여야하는경우(왼손움직이는 거리가 더 짧음).
+			{
+				answer += "L";
+				lefti = locai;
+				leftj = locaj;
+			}
+			else if (leftdistance == rightdistance)//왼손거리와 오른손 거리가 같은경우.
+			{
+				if (hand == "right")//오른손 움직여야하는경우(오른손잡이).
+				{
+					answer += "R";
+					righti = locai;
+					rightj = locaj;
+				}
+				else//왼손 움직여야하는경우(왼손잡이).
+				{
+					answer += "L";
+					lefti = locai;
+					leftj = locaj;
+				}
+			}
+			else//오른손 움직여야하는경우(오른손움직이는 거리가 더 짧음).
+			{
+				answer += "R";
+				righti = locai;
+				rightj = locaj;
+			}
+		}
+	}
+	return answer;
+}
