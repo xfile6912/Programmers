@@ -1,0 +1,134 @@
+#include <string>
+#include <vector>
+
+using namespace std;
+int visited[20][20];
+void turn(vector<vector<int>>& key)
+{
+	int size = key.size();
+	vector<vector<int>> temp(size, vector<int>(size, 0));
+	int i, j;
+	for (i = 0; i < size; i++)
+	{
+		for (j = 0; j < size; j++)
+		{
+			temp[j][size - 1 - i] = key[i][j];
+		}
+	}
+	for (i = 0; i < size; i++)
+	{
+		for (j = 0; j < size; j++)
+		{
+			key[i][j] = temp[i][j];
+		}
+	}
+}
+bool test(vector<vector<int>>lock)
+{
+	int i, j;
+	int flag=1;
+	for (i = 0; i < lock.size(); i++)
+	{
+		for (j = 0; j < lock.size(); j++)
+			if (visited[i][j] == 0)
+			{
+				flag = 0;
+				break;
+			}
+	}
+	for (i = 0; i < lock.size(); i++)
+	{
+		for (j = 0; j < lock.size(); j++)
+		{
+			if (lock[i][j] == 1)
+				visited[i][j] = 1;
+			else
+				visited[i][j] = 0;
+		}
+	}
+	if (flag == 0)
+		return false;
+	if (flag == 1)
+		return true;
+}
+vector<vector<int>> keychange(vector<vector<int>> key, int locksize)
+{
+	vector<vector<int>> changedkey(locksize, vector<int> (locksize, 0));
+	int i, j;
+	for (i = 0; i < key.size(); i++)
+	{
+		for (j = 0; j < key.size(); j++)
+		{
+			changedkey[i][j] = key[i][j];
+		}
+	}
+	return changedkey;
+
+}
+vector<vector<int>> movekey(vector<vector<int>> locksizekey, int y, int x)
+{
+	int locksize = locksizekey.size();
+	vector<vector<int>> movedkey(locksize, vector<int>(locksize, 0));
+	int i, j;
+	for (i = 0; i<locksize; i++)
+	{
+		for (j = 0; j < locksize; j++)
+		{
+			if (i + y < locksize && j + x < locksize && i+y>=0 && j+x>=0)
+				movedkey[i][j] = locksizekey[i + y][j + x];
+		}
+	}
+	return movedkey;
+
+}
+
+bool solution(vector<vector<int>> key, vector<vector<int>> lock) {
+	bool answer = false;
+	int k,i, j;
+	int keysize = key.size();
+	int locksize = lock.size();
+	int flag;
+	int y, x;
+	vector<vector<int>>locksizekey;//자물쇠 사이즈의 키;
+	vector<vector<int>>movedkey;// 움직였을때 key 저장
+	for (i = 0; i < locksize; i++)
+	{
+		for (j = 0; j < locksize; j++)
+		{
+			if (lock[i][j] == 1)
+				visited[i][j] = 1;
+			else
+				visited[i][j] = 0;
+		}
+	}
+	for (k = 0; k < 4; k++)
+	{
+		turn(key);
+		locksizekey = keychange(key, locksize);
+		for (y = -(locksize - 1); y < locksize; y++)
+		{
+			for (x = -(locksize - 1); x < locksize; x++)
+			{
+				movedkey = movekey(locksizekey, y, x);
+				flag = 1;
+				for (i = 0; i < locksize; i++)
+				{
+					for (j = 0; j < locksize; j++)
+					{
+						if (movedkey[i][j] == lock[i][j])
+						{
+							flag = 0;
+							break;
+						}
+					}
+					if (flag == 0)
+						break;
+				}
+				if (flag == 1)
+					return true;
+			}
+		}
+
+	}
+	return answer;
+}
