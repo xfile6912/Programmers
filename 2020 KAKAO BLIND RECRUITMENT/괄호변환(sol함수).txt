@@ -1,0 +1,83 @@
+#include <string>
+#include <vector>
+#include <iostream>
+#include <stack>
+
+
+using namespace std;
+
+int isgood(string s)
+{
+	stack<char> st;
+	int n=s.length();
+	int i;
+	if (s.length() == 0)
+		return 0;
+	if (s[0] == ')')
+		return 0;//substring이 )로 시작하면 올바른 괄호가 아님;
+	st.push('(');
+	for (i = 1; i < n; i++)
+	{
+		if (s[i] == '(')
+			st.push(s[i]);
+		else if (s[i] == ')')
+		{
+			if (st.empty())
+				return 0;
+			if (st.top() == '(')
+				st.pop();
+		}
+	}
+	if (st.empty())
+		return 1;
+	else
+	{
+		while (!st.empty())
+			st.pop();
+	}
+}
+
+string solution(string p) {
+	string answer = "";
+	string u;
+	string v;
+	string temp;
+	string tempu;
+	int temp1, temp2;//temp1은 (를 카운트하고 temp2는 )를 카운트함;
+	if (p == answer)
+		return answer;
+	int i;
+	temp1 = 0;
+	temp2 = 0;
+	for (i = 0; i < p.length(); i++)
+	{
+		if (p[i] == '(')
+			temp1++;
+		if (p[i] == ')')
+			temp2++;
+		if (temp1 == temp2)
+			break;
+	}
+	u = p.substr(0, i+1);
+	v = p.substr(i + 1, p.length());
+	if (isgood(u) == 1)
+	{
+		answer = u + solution(v);
+	}
+	else
+	{
+		temp += '(' + solution(v);
+		temp += ')';
+		tempu = u.substr(1, u.length() - 2);
+		int j;
+		for (j = 0; j < tempu.length(); j++)
+		{
+			if (tempu[j] == '(')
+				tempu[j] = ')';
+			else if(tempu[j]==')')
+				tempu[j] = '(';
+		}
+		answer = temp + tempu;
+	}
+	return answer;
+}
