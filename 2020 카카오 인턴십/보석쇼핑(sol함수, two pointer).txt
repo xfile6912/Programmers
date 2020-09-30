@@ -1,0 +1,46 @@
+#include <string>
+#include <vector>
+#include <map>
+#include <set>
+#include <iostream>
+using namespace std;
+
+vector<int> solution(vector <string> gems)
+{
+	int i, j;
+	i = 0;
+	j = 0;
+	int min = 1000000;
+	int mini, minj;
+	vector<int> answer;
+	map<string, int> check;
+	set<string> box;
+	for (j = 0; j < gems.size(); j++)
+	{
+		check.insert(make_pair(gems[j], 0));
+	}
+	i = 0;
+	j = 0;
+	while (j < gems.size())//모든 보석을 돌아봄.
+	{
+		check.find(gems[j])->second += 1;
+		box.insert(gems[j]);
+		while(box.size() == check.size())//box size와 check size가 같아지면 모든 종류의 보석을 하나이상씩 훔친것.
+		{
+			if (j - i < min)//움직이는 거리가 가장 짧음
+			{
+				min = j-i;
+				mini = i;
+				minj = j;
+			}
+			check.find(gems[i])->second -=1;//앞에서부터 보석을 하나씩 빼봄.//한 종류씩만 훔치면 되기때문에.
+			if (check.find(gems[i])->second == 0)
+				box.erase(gems[i]);
+			i++;
+		}
+		j++;
+	}
+	answer.push_back(mini+1);
+	answer.push_back(minj+1);
+	return answer;
+}
