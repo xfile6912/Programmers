@@ -1,0 +1,49 @@
+#include <string>
+#include <vector>
+#include <queue>
+using namespace std;
+
+int visited[200] = { 0 };
+vector<int> v[200];
+queue<int> q;
+int solution(int n, vector<vector<int>> computers) {
+	int answer = 0;
+	int i;
+	int qfront;
+	int j;
+	for (i = 0; i < n; i++)
+	{
+		for (j = i + 1; j < n; j++)
+		{
+			if (computers[i][j] == 1)
+			{
+				v[i].push_back(j);
+				v[j].push_back(i);
+			}
+		}
+	}
+	
+	for (i = 0; i < n; i++)
+	{
+		if (visited[i] == 0)
+		{
+			answer++;
+			q.push(i);
+			while (!q.empty())
+			{
+				qfront = q.front();
+				visited[qfront] = 1;
+				q.pop();
+				for (j = 0; j < v[qfront].size(); j++)
+				{
+					if (visited[v[qfront][j]] == 0)
+					{
+						q.push(v[qfront][j]);
+					}
+				}
+			}
+		}
+	}
+
+	return answer;
+}
