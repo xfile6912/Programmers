@@ -1,0 +1,56 @@
+#include <string>
+#include <vector>
+#include <queue>
+using namespace std;
+typedef struct node {
+	string word;
+	int num;
+}NODE;
+
+int visited[50] = { 0 };
+
+int solution(string begin, string target, vector<string> words) {
+	int answer = 0;
+	int i,j;
+	int flag = 0;
+	NODE qfront;
+	NODE temp;
+	queue<NODE> q;
+	int n = words.size();
+	temp.word = begin;
+	temp.num = 0;
+	q.push(temp);
+	while (!q.empty())
+	{
+		qfront = q.front();
+		if (qfront.word == target)
+		{
+			if (answer == 0)
+				answer = qfront.num;
+			else if (answer > qfront.num)
+				answer = qfront.num;
+		}
+		q.pop();
+		for (i = 0; i < n; i++)
+		{
+			if (visited[i] == 0)
+			{
+				flag = 0;
+				for (j = 0; j < qfront.word.size(); j++)
+				{
+					if (qfront.word[j] != words[i][j])
+						flag++;
+				}
+
+				if (flag == 1)
+				{
+					visited[i] = 1;
+					temp.word = words[i];
+					temp.num = qfront.num + 1;
+					q.push(temp);
+				}
+			}
+		}
+	}
+	return answer;
+}
