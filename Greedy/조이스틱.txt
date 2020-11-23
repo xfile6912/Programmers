@@ -1,0 +1,66 @@
+#include <string>
+#include <vector>
+
+using namespace std;
+
+int solution(string name) {
+	int answer = 0;
+	int i;
+	int n = name.size();
+	string compare;
+	for (i = 0; i < n ;i++)
+		compare += "A";
+	int temp1;
+	int cnt1;
+	int cnt2;
+	int temp2;
+	i = 0;
+	while (1)
+	{
+		if(name[i]>'M')
+		{ 
+			answer += 'A' + 26 - name[i];
+			compare[i] = name[i];
+		}
+		else
+		{
+			answer += name[i] - 'A';
+			compare[i] = name[i];
+		}
+		if (compare == name)
+			break;
+		temp1 = temp2 = i;
+		cnt1 = cnt2 = 0;
+		while (1)
+		{
+			temp1--;
+			cnt1++;
+			if (temp1 < 0)
+				temp1 = n - 1;
+			if (name[temp1] != 'A' && compare[temp1]=='A')
+			{
+				break;
+			}
+		}
+		while (1)
+		{
+			temp2++;
+			cnt2++;
+			if (name[temp2] != 'A' && compare[temp2]=='A')
+			{
+				break;
+			}
+		}
+		if (cnt1 < cnt2)
+		{
+			i = temp1;
+			answer += cnt1;
+		}
+		else
+		{
+			i = temp2;
+			answer += cnt2;
+		}
+	}
+		return answer;
+}
