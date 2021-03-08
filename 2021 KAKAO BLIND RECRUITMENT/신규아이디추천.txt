@@ -1,0 +1,64 @@
+#include <string>
+#include <vector>
+
+using namespace std;
+
+string solution(string new_id) {
+    string answer = "";
+    vector<char> recommended;
+
+    for(int i=0; i<new_id.length(); i++)
+    {
+        if('A'<=new_id[i] && new_id[i]<='Z')
+        {
+            new_id[i]=new_id[i]-'A'+'a';
+        }
+        recommended.push_back(new_id[i]);
+    }//change lower case to upper case
+
+    for(int i=0; i<recommended.size(); i++)
+    {
+        if(('a'<=recommended[i]&&recommended[i]<='z')||('0'<=recommended[i]&&recommended[i]<='9')||recommended[i]=='-'||recommended[i]=='_'||recommended[i]=='.')
+        {
+                //허용되는 문자인경우
+        }
+        else{
+            //허용되지 않는 문자인 경우 해당 문자를 제거해주고, i감소시킴(제거해줘서 하나씩 당겨졌으므로)
+            recommended.erase(recommended.begin()+i);
+            i--;
+        }
+    }
+
+    for(int i=1; i<recommended.size(); i++)
+    {
+        if(recommended[i-1]=='.' && recommended[i]=='.')//마침표가 연속인경우 뒤의 마침표 제거
+        {
+            recommended.erase(recommended.begin()+i);
+            i--;
+        }
+    }
+    if(!recommended.empty())
+    {
+    if(recommended[0]=='.')//id의 첫시작이 마침표이면 삭제
+        recommended.erase(recommended.begin());
+    if(recommended[recommended.size()-1]=='.')//id의 끝이 마침표이면 삭제
+        recommended.pop_back();
+    }
+    if(recommended.empty())//빈 문자열이면 'a' 추가
+        recommended.push_back('a');
+
+    while(recommended.size()>=16)//new_id의 길이가 16자 이상이면, new_id의 첫 15개의 문자를 제외한 나머지 문자들을 모두 제거
+    {
+        recommended.pop_back();
+    }
+    if(!recommended.empty() && recommended[recommended.size()-1]=='.')//제거 후 마침표가 끝에 있으면 마침표 제거
+        recommended.pop_back();
+    
+    while(recommended.size()<=2)//길이가 2이하라면 마지막 문자를 붙임
+        recommended.push_back(recommended[recommended.size()-1]);
+    for(int i; i<recommended.size(); i++)
+    {
+        answer+=recommended[i];
+    }
+    return answer;
+}
