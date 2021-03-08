@@ -56,7 +56,7 @@ string solution(string new_id) {
     
     while(recommended.size()<=2)//길이가 2이하라면 마지막 문자를 붙임
         recommended.push_back(recommended[recommended.size()-1]);
-    for(int i; i<recommended.size(); i++)
+    for(int i=0; i<recommended.size(); i++)
     {
         answer+=recommended[i];
     }
