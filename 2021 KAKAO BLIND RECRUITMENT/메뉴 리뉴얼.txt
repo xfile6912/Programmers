@@ -1,0 +1,77 @@
+#include <string>
+#include <vector>
+#include <iostream>
+#include <map>
+#include <iterator>
+#include <algorithm>
+using namespace std;
+vector<char> comb; 
+map<string, int> m;
+void get_combination(int num_of_course,int i, vector<char> order)
+{
+    if(comb.size()==num_of_course)
+    {
+        //comb가 꽉찬 것이므로 맵에 넣기.
+        string comb_string="";
+        for(int i=0; i<comb.size(); i++)
+        {
+            comb_string+=comb[i];
+        }
+        if(m.find(comb_string)!=m.end())//map에 comb_string이 있는경우 1증가시켜줌
+        {
+            m.find(comb_string)->second=m.find(comb_string)->second+1;
+        }
+        else{
+            m.insert(make_pair(comb_string,1));
+        }
+        return ;
+    }
+
+    if(i==order.size())
+        return;
+    
+
+        comb.push_back(order[i]);
+        get_combination(num_of_course, i+1, order);
+        comb.pop_back();
+        get_combination(num_of_course, i+1, order);
+
+
+}
+
+vector<string> solution(vector<string> orders, vector<int> course) {
+    vector<string> answer;
+
+    for(int i=0; i<course.size(); i++)
+    {
+        int num_of_course=course[i];
+        map<string, int> m;
+        for(int j=0; j<orders.size(); j++)//order들을 돌면서 만들 수 있는 조합 생성후 map에 푸시.
+        {
+            vector<char> ordered_order;
+            for(int k=0; k<orders[j].length(); k++)
+                ordered_order.push_back(orders[j][k]);
+            sort(ordered_order.begin(), ordered_order.end());
+            get_combination(num_of_course, 0, ordered_order);
+            
+        }
+    }
+    vector<int> max_count(11, 0);
+    std::map<string,int>::iterator iter;
+    for(iter=m.begin(); iter!=m.end(); iter++)//Map을 순회하면서 해당 Length의 가장 많은 빈도의 수를 max_count 배열에 기록
+    {
+        int length=(iter->first).length();
+        if(iter->second>max_count[length])
+            max_count[length]=iter->second;
+    }
+
+
+    for(iter=m.begin(); iter!=m.end(); iter++)
+    {
+        int length=(iter->first).length();
+        if(max_count[length]>1 && max_count[length]==iter->second)//해당 length의 가장 많은 빈도의 수와 같으면서 2번이상나타난 것을 answer에 push
+            answer.push_back(iter->first);
+    }
+    sort(answer.begin(), answer.end());//오름차순 정렬
+    return answer;
+}
