@@ -1,0 +1,87 @@
+#include <string>
+#include <vector>
+#include <string>
+#include <iostream>
+
+using namespace std;
+
+int time_to_second(string time)//HH:MM:SS양식을 초단위로 바꾸어줌.
+{
+    //HH:MM:SS
+    int hour=(time[0]-'0')*10+(time[1]-'0');
+    int minute=(time[3]-'0')*10+(time[4]-'0');
+    int second=(time[6]-'0')*10+(time[7]-'0');
+    return hour*3600+minute*60+second;
+}
+string second_to_time(int second)
+{
+    string ret="";
+
+    int hour, min, sec;
+    hour=second/3600;
+    min=(second%3600)/60;
+    sec=second%60;
+
+    if(hour<10)
+        ret+='0';
+    ret+=to_string(hour)+":";//hour
+    
+    if(min<10)
+        ret+='0';
+    ret+=to_string(min)+ ":";//minute
+
+    if(sec<10)
+        ret+='0';
+    ret+= to_string(sec);//sec
+    return ret;
+}
+void parse_log(string log, int *start, int *end)
+{
+        //HH:MM:SS
+    int hour=(log[0]-'0')*10+(log[1]-'0');
+    int minute=(log[3]-'0')*10+(log[4]-'0');
+    int second=(log[6]-'0')*10+(log[7]-'0');
+    *start=hour*3600+minute*60+second;
+    
+    hour=(log[9]-'0')*10+(log[10]-'0');
+    minute=(log[12]-'0')*10+(log[13]-'0');
+    second=(log[15]-'0')*10+(log[16]-'0');
+    *end=hour*3600+minute*60+second;
+}
+string solution(string play_time, string adv_time, vector<string> logs) {
+    string answer = "";
+    int time_zone[360000]={0};//해당 시간대에 시청한 사람의 수를 초단위로(ex>time_zone[0]=0~1초 사이에 시청한 사람의 수)
+    int playtime=time_to_second(play_time);//초단위로 바꾼 playtime
+    int advtime=time_to_second(adv_time);//초단위로 바꾼 advtime
+    for(int i=0; i<logs.size(); i++)
+    {
+        int start, end;
+        parse_log(logs[i], &start, &end);
+        for(int j=start; j<end; j++)
+        {
+            time_zone[j]++;
+        }
+    }
+    int start=0, end=advtime-1;
+    long accumulate=0;//누적 시간
+    for(int i=start; i<=end; i++)//0초부터 광고시간동안 시청한 사람의 누적시간 계산
+    {
+        accumulate+=time_zone[i];
+    }
+    int max_idx=start;//maximum accumulate값의 시작점 저장
+    long max_accum=accumulate;//maximum accumulate값 저장
+
+    for(int i=end+1; i<360000; i++)
+    {
+        start++;
+        //accumulate값 갱신, 원래 범위의 가장 앞쪽것을, 범위로 들어온 i번째거 하나 더해줌
+        accumulate=accumulate+time_zone[i]-time_zone[start-1];
+        if(accumulate>max_accum)//최고치를 갱신한 경우
+        {
+            max_idx=start;//maximum accumulate값의 시작점 저장
+            max_accum=accumulate;//maximum accumulate값 저장
+        }
+    }
+    answer=second_to_time(max_idx);//올바른 포맷으로 바꾸어줌
+    return answer;
+}
