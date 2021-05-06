@@ -1,0 +1,69 @@
+#include <string>
+#include <vector>
+#include <queue>
+
+using namespace std;
+
+int dir[4][2] = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
+
+//y, x 방향으로 갈수 있으면 1, 갈수 없으면 0리턴
+int can_go(int y, int x, vector<vector<int> > &board)
+{
+    int size = board.size();
+    if (y >= 0 && y < size && x >= 0 && x < size && board[y][x] == 0)
+        return 1;
+    return 0;
+}
+
+int solution(vector<vector<int> > board)
+{
+    int answer = 987654321;
+    int size = board.size();
+    vector<vector<int> > memorize(size, vector<int> (size, 987654321));//y, x 까지의 cost를 저장하여 이보다 크면 가지 않음.
+    queue<vector<int> > bfs_queue;
+
+    vector<int> temp(4, 0); //[0]에는 y좌표, [1]에는 x좌표, [2]에는 cost, [3]에는 last dir;
+    temp[0] = 0;
+    temp[1] = 0;
+    temp[2] = 0;
+    temp[3] = -1;
+    bfs_queue.push(temp);
+
+    while (!bfs_queue.empty())
+    {
+        int y = bfs_queue.front()[0];        //y좌표
+        int x = bfs_queue.front()[1];        //x좌표
+        int cost = bfs_queue.front()[2];     //cost
+        int last_dir = bfs_queue.front()[3]; //last_dir이 0이면 y, x는 세로 방향, 1이면 가로방향에서 온 것임. -1이면 y, x는 0 의미.
+        bfs_queue.pop();
+
+        if(memorize[y][x]>=cost)
+        {
+            memorize[y][x]=cost;
+        }
+        else
+            continue;
+
+        for (int k = 0; k < 4; k++)
+        {
+            if (can_go(y + dir[k][0], x + dir[k][1], board) == 1) //새로운 direction을 갈 수 있는지 없는지 체크
+            {
+                int new_y = y + dir[k][0];
+                int new_x = x + dir[k][1];
+                int new_cost = cost + 100; //갱신 필요
+                int new_last_dir = k / 2;
+                if (last_dir != -1 && last_dir != new_last_dir) //[y][x]->[new_y][new_x]가 0으로 부터 온 것이 아니고,  방향이 꺽인다면 new_cost에 500추가로 필요함.
+                {
+                    new_cost += 500;
+                }
+
+                temp[0] = new_y;
+                temp[1] = new_x;
+                temp[2] = new_cost;
+                temp[3] = new_last_dir;
+                bfs_queue.push(temp);
+            }
+        }
+    }
+    return memorize[size-1][size-1];
+}
