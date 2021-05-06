@@ -1,0 +1,195 @@
+#include <stdio.h>
+#include <vector>
+#include <algorithm>
+#include <queue>
+
+using namespace std;
+int is_clicked = 0; //하나를 선택하여 이미 뒤집었는지의 여부
+int clicked_i = -1; //뒤집어진 것의 행 좌표
+int clicked_j = -1; //뒤집어진 것의 열 좌표
+int dir[4][2] = {{1, 0}, {0, -1}, {-1, 0}, {0, 1}};
+int coordinate[7][4] = {-1}; //1번 부터 6번 카드의 좌표 저장([0][1]-> 두개의 겹치는 카드 중 첫 카드의 좌표 [2][3] 두번째 카드의 좌표).
+int card_size = 0;           //card의 개수
+vector<int> combination;
+int visited[7] = {0};
+int board_visited[4][4] = {0};
+
+void init_board_visited()
+{
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 4; j++)
+            board_visited[i][j] = 0;
+}
+
+void init_coordinate()
+{
+    for(int i=0; i<7; i++)
+    {
+        for(int j=0; j<4; j++)
+        {
+            coordinate[i][j]=-1;
+        }
+    }
+}
+
+int min_distance(vector<vector<int> > &board, int r, int c, int toy, int tox)
+{
+    queue<vector<int> > bfs_queue; //좌표 넣어줌.
+    vector<int> info(3, 0);        //[0]=r, [1]=c, [2]=count;
+    info[0] = r;
+    info[1] = c;
+    info[2] = 0;
+
+    bfs_queue.push(info);
+    int count = 0; //누른 입력의 개수
+    while (1)
+    {
+        int y = bfs_queue.front()[0];
+        int x = bfs_queue.front()[1];
+        int count = bfs_queue.front()[2];
+        bfs_queue.pop();
+        board_visited[y][x] = 1; //visit했다고 표기해줌 board[y][x]를
+        if (y == toy && x == tox)
+            return count;
+
+        for (int i = 0; i < 4; i++) //그냥 방향키인 경우
+        {
+            int new_r = y + dir[i][0];
+            int new_c = x + dir[i][1];
+            if (new_r < 0 || new_c < 0 || new_r >= 4 || new_c >= 4) //범위를 벗어나면
+            {
+                continue;
+            }
+            if (board_visited[new_r][new_c] == 0) //방문한 적이 없다면 queue에 넣어줌
+            {
+                info[0] = new_r;
+                info[1] = new_c;
+                info[2] = count + 1;
+                bfs_queue.push(info);
+            }
+        }
+
+        for (int i = 0; i < 4; i++) //control+방향키인 경우
+        {
+            int new_r;
+            int new_c;
+            for (int j = 1;; j++)
+            {
+                new_r = y + dir[i][0] * j;
+                new_c = x + dir[i][1] * j;
+
+                if (new_r < 0 || new_c < 0 || new_r >= 4 || new_c >= 4) //범위를 벗어나면
+                {
+                    //가장자리 값으로 조정해줌
+                    new_r -= dir[i][0];
+                    new_c -= dir[i][1];
+                    if (board_visited[new_r][new_c] == 0) //방문한 적이 없다면 queue에 넣어줌
+                    {
+                        if(new_r < 0 || new_c < 0 || new_r >= 4 || new_c >= 4)
+                            break;
+                        info[0] = new_r;
+                        info[1] = new_c;
+                        info[2] = count + 1;
+                        bfs_queue.push(info);
+                    }
+                    break;
+                }
+                if (board[new_r][new_c] != 0)
+                {
+                    if (board_visited[new_r][new_c] == 0) //방문한 적이 없다면 queue에 넣어줌
+                    {
+                        info[0] = new_r;
+                        info[1] = new_c;
+                        info[2] = count + 1;
+                        bfs_queue.push(info);
+                    }
+                    break;
+                }
+            }
+        }
+    }
+}
+
+int get_answer(vector<vector<int> > &board, int r, int c, int count)
+{
+    int result1 = 987654321;
+    int result2 = 987654321;
+    if (count == card_size / 2)
+    {
+        return 0;
+    }
+    init_board_visited();
+    result1 = min_distance(board, r, c, coordinate[combination[count]][0], coordinate[combination[count]][1]);
+
+    init_board_visited();
+    //[0][1](fromy,fromx) 부터 [2][3](toy, tox)까지의 min distance
+    result1 += min_distance(board, coordinate[combination[count]][0], coordinate[combination[count]][1], coordinate[combination[count]][2], coordinate[combination[count]][3]);
+
+    board[coordinate[combination[count]][0]][coordinate[combination[count]][1]]=0;
+    board[coordinate[combination[count]][2]][coordinate[combination[count]][3]]=0;
+    result1 += get_answer(board, coordinate[combination[count]][2], coordinate[combination[count]][3], count + 1);
+    board[coordinate[combination[count]][0]][coordinate[combination[count]][1]]=combination[count];
+    board[coordinate[combination[count]][2]][coordinate[combination[count]][3]]=combination[count];
+
+    init_board_visited();
+    result2 = min_distance(board, r, c, coordinate[combination[count]][2], coordinate[combination[count]][3]);
+    init_board_visited();
+    //[2][3](fromy, fromx)부터 [0][1](toy,tox) 까지의 min distance
+    result2 += min_distance(board, coordinate[combination[count]][2], coordinate[combination[count]][3], coordinate[combination[count]][0], coordinate[combination[count]][1]);
+    board[coordinate[combination[count]][0]][coordinate[combination[count]][1]]=0;
+    board[coordinate[combination[count]][2]][coordinate[combination[count]][3]]=0;
+    result2 += get_answer(board, coordinate[combination[count]][0], coordinate[combination[count]][1], count + 1);
+    board[coordinate[combination[count]][0]][coordinate[combination[count]][1]]=combination[count];
+    board[coordinate[combination[count]][2]][coordinate[combination[count]][3]]=combination[count];
+    return min(result1, result2);
+}
+
+int get_combination(vector<vector<int> > &board, int num, int r, int c)
+{
+    int result = 987654321;
+    if (combination.size() == num)
+    {
+        return get_answer(board, r, c, 0);
+    }
+    for (int i = 1; i <= num; i++)
+    {
+        if (visited[i] == 0)
+        {
+            visited[i] = 1;
+            combination.push_back(i);
+            result = min(result, get_combination(board, num, r, c));
+            combination.pop_back();
+            visited[i] = 0;
+        }
+    }
+    return result;
+}
+
+int solution(vector<vector<int> > board, int r, int c)
+{
+    int answer = 0;
+    init_coordinate();
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            if (board[i][j] != 0)
+            {
+                card_size++;
+                int card_num = board[i][j];
+                if (coordinate[card_num][0] == -1)
+                {
+                    coordinate[card_num][0] = i;
+                    coordinate[card_num][1] = j;
+                }
+                else
+                {
+                    coordinate[card_num][2] = i;
+                    coordinate[card_num][3] = j;
+                }
+            }
+        }
+    }
+    answer = get_combination(board, card_size / 2, r, c)+card_size;
+    return answer;
+}
