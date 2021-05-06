@@ -112,8 +112,8 @@ int min_distance(vector<vector<int> > &board, int r, int c, int toy, int tox)
 
 int get_answer(vector<vector<int> > &board, int r, int c, int count)
 {
-    int result1 = 987654321;
-    int result2 = 987654321;
+    int result1 = 987654321;//같은 번호끼리의 이동 1번 케이스([y1][x1] 부터 [y2][x2]까지의 이동)
+    int result2 = 987654321;//같은 번호끼리의 이동 2번 케이스([y2][x2]부터 [y1][x1]까지의 이동)
     if (count == card_size / 2)
     {
         return 0;
@@ -122,29 +122,29 @@ int get_answer(vector<vector<int> > &board, int r, int c, int count)
     result1 = min_distance(board, r, c, coordinate[combination[count]][0], coordinate[combination[count]][1]);
 
     init_board_visited();
-    //[0][1](fromy,fromx) 부터 [2][3](toy, tox)까지의 min distance
+    //[0][1](y1,x1) 부터 [2][3](y2, x2)까지의 min distance
     result1 += min_distance(board, coordinate[combination[count]][0], coordinate[combination[count]][1], coordinate[combination[count]][2], coordinate[combination[count]][3]);
 
     board[coordinate[combination[count]][0]][coordinate[combination[count]][1]]=0;
     board[coordinate[combination[count]][2]][coordinate[combination[count]][3]]=0;
-    result1 += get_answer(board, coordinate[combination[count]][2], coordinate[combination[count]][3], count + 1);
+    result1 += get_answer(board, coordinate[combination[count]][2], coordinate[combination[count]][3], count + 1);//남은 경로를 재귀를 통해 구해냄.
     board[coordinate[combination[count]][0]][coordinate[combination[count]][1]]=combination[count];
     board[coordinate[combination[count]][2]][coordinate[combination[count]][3]]=combination[count];
 
     init_board_visited();
     result2 = min_distance(board, r, c, coordinate[combination[count]][2], coordinate[combination[count]][3]);
     init_board_visited();
-    //[2][3](fromy, fromx)부터 [0][1](toy,tox) 까지의 min distance
+    //[2][3](y2, x2)부터 [0][1](y1,x1) 까지의 min distance
     result2 += min_distance(board, coordinate[combination[count]][2], coordinate[combination[count]][3], coordinate[combination[count]][0], coordinate[combination[count]][1]);
     board[coordinate[combination[count]][0]][coordinate[combination[count]][1]]=0;
     board[coordinate[combination[count]][2]][coordinate[combination[count]][3]]=0;
-    result2 += get_answer(board, coordinate[combination[count]][0], coordinate[combination[count]][1], count + 1);
+    result2 += get_answer(board, coordinate[combination[count]][0], coordinate[combination[count]][1], count + 1);//남은 경로르 재귀롤 통해 구해냄.
     board[coordinate[combination[count]][0]][coordinate[combination[count]][1]]=combination[count];
     board[coordinate[combination[count]][2]][coordinate[combination[count]][3]]=combination[count];
     return min(result1, result2);
 }
 
-int get_combination(vector<vector<int> > &board, int num, int r, int c)
+int get_combination(vector<vector<int> > &board, int num, int r, int c)//번호를 통해 만들어낼 수 있느 combination 구함.
 {
     int result = 987654321;
     if (combination.size() == num)
@@ -173,7 +173,7 @@ int solution(vector<vector<int> > board, int r, int c)
     {
         for (int j = 0; j < 4; j++)
         {
-            if (board[i][j] != 0)
+            if (board[i][j] != 0)//card번호의 좌표를 저장
             {
                 card_size++;
                 int card_num = board[i][j];
@@ -190,6 +190,6 @@ int solution(vector<vector<int> > board, int r, int c)
             }
         }
     }
-    answer = get_combination(board, card_size / 2, r, c)+card_size;
+    answer = get_combination(board, card_size / 2, r, c)+card_size;//card_size를 더해주는 이유는 enter의 개수만큼 더해주기 위해서.
     return answer;
 }
