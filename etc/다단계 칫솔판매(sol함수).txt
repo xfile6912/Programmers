@@ -1,0 +1,37 @@
+#include <string>
+#include <vector>
+#include <map>
+using namespace std;
+
+vector<int> solution(vector<string> enroll, vector<string> referral, vector<string> seller, vector<int> amount) {
+    vector<int> answer(enroll.size(), 0);
+    map<string, int> employees;//이름과 id번호 맵핑
+    vector<int> recommendor(enroll.size(), -1);//추천인의 번호를 저장하고 있
+    
+    int i, j;
+    for(i=0; i<enroll.size(); i++)
+    {
+        employees.insert(make_pair(enroll[i], i));
+        if(referral[i]!="-")
+        {
+            int rec_id=employees[referral[i]];//추천인의 id
+            recommendor[i]=rec_id;
+        }
+    }
+    for(i=0; i<seller.size(); i++)
+    {
+        int seller_id=employees[seller[i]];
+        int money=amount[i]*100;
+        while(1)
+        {
+            int rec_id=recommendor[seller_id];
+            int fee= (int)money*0.1;//recommendor에게 줄 수수료
+            answer[seller_id]+= money-fee;
+            if(rec_id==-1)
+                break;
+            money=fee;
+            seller_id=rec_id;
+        }
+    }
+    return answer;
+}
