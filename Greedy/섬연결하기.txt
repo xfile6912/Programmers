@@ -1,0 +1,42 @@
+#include <string>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+bool compare(vector<int> x, vector<int> y)
+{
+	if (x[2] != y[2])
+		return x[2] < y[2];
+	else if (x[1] != y[1])
+		return x[1] < y[1];
+	else
+		return x[0] < y[0];
+}
+
+vector<int> visited(100, -1);
+
+int find(int x)
+{
+	while (visited[x] != -1)
+	{
+		x = visited[x];
+	}
+	return x;
+}
+
+int solution(int n, vector<vector<int>> costs) {
+	int answer = 0;
+	int size = costs.size();
+	sort(costs.begin(), costs.end(), compare);
+	int i;
+	for (i = 0; i < size; i++)
+	{
+		if (find(costs[i][0]) != find(costs[i][1]))
+		{
+			answer += costs[i][2];
+			visited[find(costs[i][1])] = find(costs[i][0]);
+		}
+	}
+	return answer;
+}
