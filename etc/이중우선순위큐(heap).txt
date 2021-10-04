@@ -1,0 +1,51 @@
+#include <string>
+#include <vector>
+#include <queue>
+#include <stdlib.h>
+#include <algorithm>
+using namespace std;
+deque<int> q;
+
+vector<int> solution(vector<string> operations) {
+	vector<int> answer;
+	int temp;
+	int n = operations.size();
+	int i;
+	int cnt=0;
+	for (i = 0; i < n; i++)
+	{
+		if (operations[i][0] == 'I')
+		{
+			temp = atoi(&operations[i][2]);
+			q.push_back(temp);
+			sort(q.begin(), q.end());
+			cnt++;
+		}
+		else if (operations[i][0] == 'D')
+		{
+			if (q.empty())
+				continue;
+			else if (operations[i][2] == '1')
+			{
+				q.pop_back();
+				cnt--;
+			}
+			else if (operations[i][2] == '-')
+			{
+				cnt--;
+				q.pop_front();
+			}
+		}
+	}
+	if (q.empty())
+	{
+		answer.push_back(0);
+		answer.push_back(0);
+	}
+	else
+	{
+		answer.push_back(q[cnt-1]);
+		answer.push_back(q.front());
+	}
+	return answer;
+}
