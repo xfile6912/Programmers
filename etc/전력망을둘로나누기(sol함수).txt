@@ -1,0 +1,50 @@
+#include <string>
+#include <vector>
+
+using namespace std;
+
+int dfs(vector<vector<int> > &graph, vector<int> &visited, int num)
+{
+    visited[num]=1;
+    int ret=1;//자기 자신
+    for(int i=0; i<graph[num].size(); i++)
+    {
+        if(visited[graph[num][i]]==0)//아직 방문하지 않았다면 방문
+        {
+            ret+=dfs(graph, visited, graph[num][i]);
+        }
+    }
+    return ret;
+}
+
+int solution(int n, vector<vector<int>> wires) {
+    int answer = 987654321;
+    
+    for(int i=0; i<wires.size(); i++)
+    {
+        vector<vector<int> > graph(n+1);
+        vector<int> visited(n+1, 0);
+        for(int j=0; j<wires.size(); j++)
+        {
+            if(i!=j)//i번째의 wire를 끊음
+            {
+                //graph를 생성해줌
+                graph[wires[j][0]].push_back(wires[j][1]);
+                graph[wires[j][1]].push_back(wires[j][0]);
+            }
+        }
+        
+        int dfs1 = dfs(graph, visited, wires[i][0]);//끊은 wire의 한쪽 node부터 탐색
+        int dfs2 = n -dfs1;
+        int temp_answer;
+        if(dfs1<=dfs2)//차의 절댓값 구해줌
+            temp_answer = dfs2-dfs1;
+        else
+            temp_answer = dfs1-dfs2;
+        
+        if(answer>temp_answer)//가장 작도록 갱신
+            answer=temp_answer;
+    }
+    
+    return answer;
+}
