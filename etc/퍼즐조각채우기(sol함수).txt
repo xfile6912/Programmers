@@ -1,0 +1,166 @@
+#include <string>
+#include <vector>
+
+using namespace std;
+
+typedef struct PUZZLE{
+    vector<int> y;
+    vector<int> x;
+    int id;
+}puzzle;
+
+int dir[4][2]={{-1, 0}, {0, -1}, {1, 0}, {0, 1}};
+
+//table을 회전시켜줌
+vector<vector<int>> rotate_table(vector<vector<int>> &table)
+{
+    int size=table.size();
+    vector<vector<int>> rotated(size, vector<int> (size, 0));
+    for(int i=0; i<size; i++)
+    {
+        for(int j=0; j<size; j++)
+        {
+            rotated[j][size-i-1]=table[i][j];
+        }
+    }
+    return rotated;
+}
+//특정 id로 table의 특정 퍼즐에 해당하는 부분을 체크해줌
+void set_id_dfs(int y, int x, int id, vector<vector<int>> &visited, vector<vector<int>> &table)
+{
+    visited[y][x]=1;//방문했다고 체크해주고
+    table[y][x]=id;
+    
+    for(int i=0; i<4; i++)
+    {
+        int nexty=y+dir[i][0];
+        int nextx=x+dir[i][1];
+        if(nexty<0 || nextx<0 || nexty>=table.size() || nextx>=table.size())
+            continue;
+        if(table[nexty][nextx]==1 && visited[nexty][nextx]==0)
+            set_id_dfs(nexty, nextx, id, visited, table);
+    }
+}
+//puzzle들의 id로 분류할수 있도록 table을 수정해줌
+void set_puzzle_id(int n, vector<vector<int>> &table)
+{
+    int id=2;//분류함에 있어서 puzzle들은 다 1로 되어있으므로 id는 2부터 시작
+    vector<vector<int>> visited(n, vector<int> (n, 0));
+    for(int i=0; i<n; i++)
+    {
+        for(int j=0; j<n; j++)
+        {
+            if(table[i][j]==1 && visited[i][j]==0)//방문하지 않았다면
+                set_id_dfs(i, j, id++, visited, table);
+        }
+    }
+}
+
+
+void make_puzzle_structure_dfs(int y, int x, int cy, int cx, puzzle *puz, vector<vector<int>> &visited, vector<vector<int>> &table)
+{
+    visited[y][x]=1;
+    puz->y.push_back(y-cy);
+    puz->x.push_back(x-cx);
+    
+    for(int i=0; i<4; i++)//4방향 탐색
+    {
+        int nexty=y+dir[i][0];
+        int nextx=x+dir[i][1];
+        if(nexty<0 || nextx<0 || nexty>=table.size() || nextx>=table.size())
+            continue;
+        if(table[nexty][nextx]==puz->id && visited[nexty][nextx]==0)//puz id와 같고 방문하지 않았다면 방문해서 puz구조체의 일부로 추가해줌
+            make_puzzle_structure_dfs(nexty, nextx, cy, cx, puz, visited, table);
+    }
+}
+
+int solution(vector<vector<int>> game_board, vector<vector<int>> table) {
+    int answer = 0;
+    int n=table.size();
+    
+    set_puzzle_id(n, table);//table에 있는 puzzle들의 id를 set해줌
+    
+    vector<puzzle> puzzles;//table의 puzzle정보
+    vector<puzzle> gb_holes;//game board의 빈칸 정보
+    
+    //table에서 가지고 있는 puzzle 조각들의 정보 추출
+    for(int l=0; l<4; l++)//회전시켜 puzzle 구조체로 정보 추출
+    {
+        table=rotate_table(table);
+        vector<vector<int> > visited(n, vector<int> (n, 0));
+        for(int i=0; i<n; i++)
+        {
+            for(int j=0; j<n; j++)
+            {
+                //방문하지 않고, puzzle의 일부라면 puzzle구조체로 추출하여 puzzles 리스트에 넣어줌
+               if(visited[i][j]==0 && table[i][j]!=0)
+               {
+                   puzzle puz;
+                   puz.id=table[i][j];
+                   make_puzzle_structure_dfs(i, j, i, j, &puz, visited, table);
+                   puzzles.push_back(puz);
+               }
+            }
+        }
+    }
+    //game board의 빈칸 정보 추출
+    vector<vector<int> > visited(n, vector<int> (n, 0));
+    for(int i=0; i<n; i++)
+    {
+        for(int j=0; j<n; j++)
+        {
+            //방문하지 않고, 빈칸의 일부라면 puzzle구조체로 추출하여 gb_holes 리스트에 넣어줌
+            if(visited[i][j]==0 && game_board[i][j]==0)
+            {
+                printf("%d %d\n", i, j);
+                puzzle puz;
+                puz.id=game_board[i][j];
+                make_puzzle_structure_dfs(i, j, i, j, &puz, visited, game_board);
+                gb_holes.push_back(puz);
+            }
+        }
+    }
+    
+    //gb_holes와 puzzles의 비교를 통해 얼마나 많이 채울수 있는지 확인
+    for(int i=0; i<gb_holes.size(); i++)
+    {
+        int matched_id=-1;//gb_holes[i]와 매칭되는 puzzle의 id 저장
+        
+        
+        
+        for(int j=0; j<puzzles.size(); j++)
+        {
+            if(gb_holes[i].y.size() == puzzles[j].y.size())//가지고 있는 칸의 숫자가 같다면 후보임
+            {
+                int flag=1;
+                for(int k=0; k<gb_holes[i].y.size(); k++)
+                {
+                    if(gb_holes[i].y[k]!=puzzles[j].y[k] ||
+                      gb_holes[i].x[k]!=puzzles[j].x[k] )//하나라도 다른것이 있으면 채울수 없음
+                    {
+                        flag=0;
+                        break;
+                    }
+                }
+                if(flag==1)//완전히 매칭되어 채울수 있다면
+                {
+                    matched_id=puzzles[j].id;
+                    answer+=puzzles[j].y.size();//채우는 칸의 수만큼 answer에 더해줌
+                    break;
+                }
+            }
+        }
+        if(matched_id != -1)
+        {
+            for(int j=puzzles.size()-1; j>=0; j--)
+            {
+                if(puzzles[j].id==matched_id)//matched_id에 해당되는 것을 지워줌
+                    puzzles.erase(puzzles.begin()+j);
+            }
+        }
+        
+    }
+    
+    
+    return answer;
+}
