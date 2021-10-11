@@ -1,0 +1,36 @@
+#include <string>
+#include <vector>
+
+using namespace std;
+
+vector<int> solution(int brown, int red) {
+	vector<int> answer;
+	int total;
+	int width=0;
+	int height=0;
+	total = brown + red;
+	int i;
+	for (i = 1; i <= red; i++)
+	{
+		if (red % i == 0)
+		{
+			if (red / i >= i)
+			{
+				width = red / i;
+				height = i;
+			}
+			else
+			{
+				width = i;
+				height = red / i;
+			}
+			if (2 * width + 2 * height + 4 == brown)
+				break;
+		}
+	}
+	width += 2;
+	height += 2;
+	answer.push_back(width);
+	answer.push_back(height);
+	return answer;
+}
